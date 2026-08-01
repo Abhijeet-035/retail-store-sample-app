@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   repository: public.ecr.aws/aws-containers/retail-store-sample-ui
   pullPolicy: Always
-  tag: "cd9e15f"
+  tag: "e7f094f"
 imagePullSecrets:
   - name: regcred
 nameOverride: ""
