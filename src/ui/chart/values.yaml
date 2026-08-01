@@ -7,10 +7,10 @@ image:
   repository: 365647375845.dkr.ecr.us-west-2.amazonaws.com/retail-store-sample-ui
   pullPolicy: Always
 <<<<<<< HEAD
-  tag: "e7f094f"
+  tag: "7bc00a3"
 imagePullSecrets: []
 =======
-  tag: "7aaef7f"
+  tag: "7bc00a3"
 imagePullSecrets:
   - name: regcred
 >>>>>>> 2c60cb650a0f5ae6b6b0aefec7402d866744b0c3

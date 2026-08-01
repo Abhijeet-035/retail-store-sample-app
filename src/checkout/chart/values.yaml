@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   repository: public.ecr.aws/aws-containers/retail-store-sample-checkout
   pullPolicy: Always
-  tag: "7aaef7f"
+  tag: "7bc00a3"
 imagePullSecrets:
   - name: regcred
 nameOverride: ''
@@ -69,7 +69,7 @@ redis:
   image:
     repository: public.ecr.aws/docker/library/redis
     pullPolicy: IfNotPresent
-    tag: "7aaef7f"
+    tag: "7bc00a3"
   service:
     type: ClusterIP
     port: 6379
