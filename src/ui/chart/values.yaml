@@ -4,7 +4,7 @@
 
 replicaCount: 1
 image:
-  repository: public.ecr.aws/aws-containers/retail-store-sample-ui
+  repository: 365647375845.dkr.ecr.us-west-2.amazonaws.com/retail-store-sample-ui
   pullPolicy: Always
   tag: "e7f094f"
 imagePullSecrets:
@@ -88,7 +88,6 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/proxy-body-size: "8m"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
@@ -108,38 +107,13 @@ ingresses:
       nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     tls: []
-  # Domain-based access with SSL
-  - name: domain
-    className: "nginx"
-    hosts:
-      - retail-store.trainwithshubham.com
-    annotations:
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-      cert-manager.io/cluster-issuer: "letsencrypt-prod"
-      nginx.ingress.kubernetes.io/proxy-body-size: "8m"
-      nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
-      nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-    tls:
-      - secretName: tls-secret
-        hosts:
-          - retail-store.trainwithshubham.com
+ 
+  
 
 # Cert Manager Configuration
 certManager:
-  createClusterIssuer: true
-  email: trainwithshubham@gmail.com
-  clusterIssuerName: "letsencrypt-prod"
-  server: "https://acme-v02.api.letsencrypt.org/directory"
-  privateKeySecretName: "letsencrypt-prod-key"
-istio:
-  enabled: false
-  hosts: []
-opentelemetry:
-  enabled: false
-  instrumentation: ""
-podDisruptionBudget:
-  enabled: false
-  minAvailable: 2
-  maxUnavailable: 1
+  createClusterIssuer: false
+  email: ""
+  clusterIssuerName: ""
+  server: ""
+  privateKeySecretName: ""
