@@ -145,27 +145,54 @@ jobs:
           echo "- File: ${VALUES_FILE}" >> "$GITHUB_STEP_SUMMARY"
           echo "- New tag: ${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Configure git
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
 
-      - name: Pull latest with rebase
-        run: git pull --rebase origin main
-
-      - name: Commit Helm values update
-        env:
-          SERVICE: ${{ matrix.service }}
-        run: |
-          VALUES_FILE="src/${SERVICE}/chart/values.yaml"
-          git add "${VALUES_FILE}"
-          git commit -m "ci: update ${SERVICE} image tag to ${GITHUB_SHA::7} [skip ci]"
-
-      - name: Push to main
-        run: git push origin HEAD:main
-
+  update-helm:
+      needs: build-and-push
+      if: success()
+      runs-on: ubuntu-latest
+    
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+    
+        - name: Configure Git
+          run: |
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+    
+        - name: Update all Helm image tags
+          run: |
+            TAG=${GITHUB_SHA::7}
+    
+            for SERVICE in ui cart catalog checkout orders
+            do
+              VALUES_FILE="src/${SERVICE}/chart/values.yaml"
+    
+              if [ -f "$VALUES_FILE" ]; then
+                bash scripts/update-helm-tag.sh "$VALUES_FILE" "$TAG"
+              fi
+            done
+    
+        - name: Commit changes
+          run: |
+            git add src/*/chart/values.yaml
+    
+            git diff --cached --quiet && exit 0
+    
+            git commit -m "ci: update Helm image tags to ${GITHUB_SHA::7} [skip ci]"
+    
+        - name: Push changes
+          run: |
+            git push origin HEAD:main
+            
   pipeline-summary:
-    needs: [detect-changes, build-and-push]
+    needs:
+      - detect-changes
+      - build-and-push
+      - update-helm
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -176,3 +203,4 @@ jobs:
           echo "|-----|--------|" >> "$GITHUB_STEP_SUMMARY"
           echo "| detect-changes | ${{ needs.detect-changes.result }} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| build-and-push | ${{ needs.build-and-push.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| update-helm | ${{ needs.update-helm.result }} |" >> "$GITHUB_STEP_SUMMARY"
