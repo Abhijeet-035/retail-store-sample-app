@@ -54,7 +54,7 @@ terraform apply
 
 ```bash
 # Update kubeconfig (replace with your region and cluster name)
-aws eks update-kubeconfig --region us-west-2 --name retail-store
+aws eks update-kubeconfig --region us-west-2 --name retail-store-412r
 ```
 
 ### 5. Access ArgoCD
