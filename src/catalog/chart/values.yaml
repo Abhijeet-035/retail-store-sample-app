@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   repository: public.ecr.aws/aws-containers/retail-store-sample-catalog
   pullPolicy: Always
-  tag: "e7f094f"
+  tag: "7aaef7f"
 imagePullSecrets:
   - name: regcred
 nameOverride: ""
@@ -72,7 +72,7 @@ mysql:
   image:
     repository: public.ecr.aws/docker/library/mysql
     pullPolicy: IfNotPresent
-    tag: "e7f094f"
+    tag: "7aaef7f"
   service:
     type: ClusterIP
     port: 3306
