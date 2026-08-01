@@ -7,8 +7,7 @@ image:
   repository: 365647375845.dkr.ecr.us-west-2.amazonaws.com/retail-store-sample-ui
   pullPolicy: Always
   tag: "e7f094f"
-imagePullSecrets:
-  - name: regcred
+imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 serviceAccount:
@@ -117,3 +116,16 @@ certManager:
   clusterIssuerName: ""
   server: ""
   privateKeySecretName: ""
+
+istio:
+  enabled: false
+  hosts: []
+
+opentelemetry:
+  enabled: false
+  instrumentation: ""
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 2
+  maxUnavailable: 1
