@@ -23,7 +23,7 @@ variable "environment" {
 variable "kubernetes_version" {
   description = "Kubernetes version for EKS cluster"
   type        = string
-  default     = "1.33"
+  default     = "1.35"
 }
 
 variable "vpc_cidr" {

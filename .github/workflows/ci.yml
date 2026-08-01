@@ -1,0 +1,178 @@
+﻿name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      ui: ${{ steps.filter.outputs.ui }}
+      cart: ${{ steps.filter.outputs.cart }}
+      catalog: ${{ steps.filter.outputs.catalog }}
+      checkout: ${{ steps.filter.outputs.checkout }}
+      orders: ${{ steps.filter.outputs.orders }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed services
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            ui:
+              - 'src/ui/**'
+            cart:
+              - 'src/cart/**'
+            catalog:
+              - 'src/catalog/**'
+            checkout:
+              - 'src/checkout/**'
+            orders:
+              - 'src/orders/**'
+
+      - name: Build changed-services matrix
+        id: set-matrix
+        run: |
+          MATRIX=$(bash scripts/build-matrix.sh \
+            "${{ steps.filter.outputs.ui }}" \
+            "${{ steps.filter.outputs.cart }}" \
+            "${{ steps.filter.outputs.catalog }}" \
+            "${{ steps.filter.outputs.checkout }}" \
+            "${{ steps.filter.outputs.orders }}" \
+            "${{ github.event_name }}")
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+
+      - name: Write detection summary
+        run: |
+          echo "## Change Detection" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Trigger: ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- UTC: $(date -u)" >> "$GITHUB_STEP_SUMMARY"
+          if [ '${{ steps.set-matrix.outputs.matrix }}' = '[]' ]; then
+            echo "No services changed" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Changed services: ${{ steps.set-matrix.outputs.matrix }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  build-and-push:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.matrix != '[]' && needs.detect-changes.result == 'success'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate required secrets
+        run: |
+          MISSING=""
+          [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]     && MISSING="$MISSING AWS_ACCESS_KEY_ID"
+          [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] && MISSING="$MISSING AWS_SECRET_ACCESS_KEY"
+          [ -z "${{ secrets.AWS_REGION }}" ]             && MISSING="$MISSING AWS_REGION"
+          [ -z "${{ secrets.AWS_ACCOUNT_ID }}" ]         && MISSING="$MISSING AWS_ACCOUNT_ID"
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing required secrets:$MISSING"
+            exit 1
+          fi
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          SERVICE: ${{ matrix.service }}
+        run: |
+          IMAGE_URI="${REGISTRY}/retail-store-sample-${SERVICE}:${GITHUB_SHA::7}"
+          docker build \
+            --file "src/${SERVICE}/Dockerfile" \
+            --tag  "${IMAGE_URI}" \
+            "src/${SERVICE}/"
+          docker push "${IMAGE_URI}"
+          echo "## Image Push: ${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Registry: ${REGISTRY}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Repository: retail-store-sample-${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tag: ${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate Helm values file
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: |
+          VALUES_FILE="src/${SERVICE}/chart/values.yaml"
+          if [ ! -f "${VALUES_FILE}" ]; then
+            echo "::error::Values file not found: ${VALUES_FILE}"
+            exit 1
+          fi
+          if ! grep -q 'tag:' "${VALUES_FILE}"; then
+            echo "::error::No 'tag:' field found in ${VALUES_FILE}"
+            exit 1
+          fi
+
+      - name: Update Helm image tag
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: |
+          VALUES_FILE="src/${SERVICE}/chart/values.yaml"
+          bash scripts/update-helm-tag.sh "${VALUES_FILE}" "${GITHUB_SHA::7}"
+          echo "## Helm Update: ${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- File: ${VALUES_FILE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- New tag: ${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Pull latest with rebase
+        run: git pull --rebase origin main
+
+      - name: Commit Helm values update
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: |
+          VALUES_FILE="src/${SERVICE}/chart/values.yaml"
+          git add "${VALUES_FILE}"
+          git commit -m "ci: update ${SERVICE} image tag to ${GITHUB_SHA::7} [skip ci]"
+
+      - name: Push to main
+        run: git push origin HEAD:main
+
+  pipeline-summary:
+    needs: [detect-changes, build-and-push]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write pipeline summary
+        run: |
+          echo "## Pipeline Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Job | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| detect-changes | ${{ needs.detect-changes.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| build-and-push | ${{ needs.build-and-push.result }} |" >> "$GITHUB_STEP_SUMMARY"

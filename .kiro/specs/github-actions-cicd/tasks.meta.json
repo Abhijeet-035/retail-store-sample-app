@@ -1,0 +1,351 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Create workflow file scaffold": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410422007
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410434892
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410494193
+      }
+    ],
+    "2.1 Add `dorny/paths-filter@v3` step with per-service path filters for all five services (`src/ui/**`, `src/cart/**`, `src/catalog/**`, `src/checkout/**`, `src/orders/**`)": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410422206
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410497942
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410801588
+      }
+    ],
+    "2.2 Add matrix-construction step that reads filter outputs and emits `matrix` job output as a JSON array string; handle `workflow_dispatch` override (all five services) and the empty-matrix case": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410422347
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410811434
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410863313
+      }
+    ],
+    "2.3 Add step-summary output step that writes trigger event name, commit SHA, UTC timestamp, and the list of changed services (or \"No services changed\") to `$GITHUB_STEP_SUMMARY`": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410422478
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410895584
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411154215
+      }
+    ],
+    "3.1 Create `scripts/build-matrix.sh` that accepts five boolean arguments (one per service) and an `event_name` argument, and writes the JSON matrix array to stdout; must handle the `workflow_dispatch` override and zero-services case": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410422643
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410498977
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410803457
+      }
+    ],
+    "4.1 Wire the matrix job in `ci.yml`: add `needs: detect-changes`, `strategy.fail-fast: false`, `matrix.service: ${{ fromJson(needs.detect-changes.outputs.matrix) }}`; skip the job cleanly when the matrix is empty": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410422828
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410812489
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410864913
+      }
+    ],
+    "4.2 Add checkout step (`actions/checkout@v4`, `fetch-depth: 0`) and validate-secrets step that checks all four required secrets (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_ACCOUNT_ID`) are non-empty and fails fast with an error message listing any missing ones": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410422965
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410896695
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411155929
+      }
+    ],
+    "4.3 Add `aws-actions/configure-aws-credentials@v4` step and `aws-actions/amazon-ecr-login@v2` step; set `IMAGE_TAG` job-level env to `${{ github.sha }}`": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410423120
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410897669
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411157100
+      }
+    ],
+    "4.4 Add Docker build-and-push step: build from `src/${SERVICE}/Dockerfile` with context `src/${SERVICE}/`, tag as full ECR URI `${REGISTRY}/retail-store-sample-${SERVICE}:${GITHUB_SHA::7}`, push, and write image URI and tag to step summary": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410423279
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411165420
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411222913
+      }
+    ],
+    "5.1 Add values-file validation step in the build-and-push job: check that `src/${SERVICE}/chart/values.yaml` exists and contains a `tag:` field; emit `::error::` and exit 1 if either condition fails": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410423424
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411166413
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411230059
+      }
+    ],
+    "5.2 Create `scripts/update-helm-tag.sh` that accepts `VALUES_FILE` and `TAG` arguments and applies `sed -i \"s/^\\(\\s*tag:\\s*\\).*$/\\1\\\"${TAG}\\\"/\" \"${VALUES_FILE}\"`; make executable": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410423614
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410899139
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411158796
+      }
+    ],
+    "5.3 Add Helm update step in the build-and-push job that calls `scripts/update-helm-tag.sh` with the service values file and `${GITHUB_SHA::7}`; write the updated file path and new tag to step summary": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410423774
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411167415
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411231721
+      }
+    ],
+    "6.1 Add git-config, git-pull-rebase, git-add, git-commit, and git-push steps in the build-and-push job; commit message must be `ci: update ${SERVICE} image tag to ${GITHUB_SHA::7} [skip ci]`; use `git pull --rebase origin main` before committing to mitigate concurrent-push race conditions": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410423904
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411237246
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411288561
+      }
+    ],
+    "7. Checkpoint — ensure scripts and tests are wired correctly": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410424073
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411363272
+      }
+    ],
+    "8.1 Implement the `pipeline-summary` job body in `ci.yml`: add a single step that writes a Markdown table to `$GITHUB_STEP_SUMMARY` with the aggregate `needs.build-and-push.result` outcome; the job must run with `if: always()` and depend on `needs: [detect-changes, build-and-push]`": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410424232
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411301223
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411347465
+      }
+    ],
+    "9.1 Create `tests/test_workflow_structure.py` that uses the `subprocess` module to run `actionlint .github/workflows/ci.yml` (or `actionlint -format '{{json .}}'` for structured output) and asserts exit code 0; also assert the following structural invariants by parsing the YAML directly with `PyYAML`:": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410424388
+      },
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411364411
+      }
+    ],
+    "10. Final checkpoint — full pipeline review": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410424523
+      }
+    ],
+    "3. Extract and implement build-matrix shell script": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410803588
+      }
+    ],
+    "3.2 Write property test for matrix construction (Property 2)": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785410890821
+      }
+    ],
+    "2. Implement detect-changes job": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411154396
+      }
+    ],
+    "4.5 Write property test for image tag naming convention (Property 3)": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411164393
+      }
+    ],
+    "4. Implement build-and-push matrix job — AWS auth and Docker build/push": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411223069
+      }
+    ],
+    "5. Implement Helm values update step and extract update script": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411231878
+      }
+    ],
+    "6. Implement git commit and push steps with rebase": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411288782
+      }
+    ],
+    "5.4 Write property test for Helm values idempotency (Property 4)": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411289665
+      }
+    ],
+    "6.2 Write property test for commit message format (Property 5)": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411300218
+      }
+    ],
+    "6.3 Write property test for skip-CI detection (Property 6)": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411300344
+      }
+    ],
+    "8. Implement pipeline-summary job": [
+      {
+        "executionId": "5dedfe19-21d9-49d7-8bde-a737d7b3b321",
+        "chatSessionId": "sess_cb33e252-455b-4c20-8353-df021e736ab0",
+        "timestamp": 1785411347633
+      }
+    ]
+  }
+}
