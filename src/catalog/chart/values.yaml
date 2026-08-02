@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   repository: 365647375845.dkr.ecr.us-west-2.amazonaws.com/retail-store-sample-catalog
   pullPolicy: Always
-  tag: "e97956c"
+  tag: "192599c"
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -71,7 +71,7 @@ mysql:
   image:
     repository: public.ecr.aws/docker/library/mysql
     pullPolicy: IfNotPresent
-    tag: "e97956c"
+    tag: "192599c"
   service:
     type: ClusterIP
     port: 3306
